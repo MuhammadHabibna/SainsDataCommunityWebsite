@@ -22,6 +22,7 @@ import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
 import bankSoal from './data/bank_soal';
 import { supabase } from './lib/supabaseClient';
+import { MD5 } from 'crypto-js';
 
 // --- CONFIGURATION & ASSETS ---
 const assets = {
@@ -34,6 +35,7 @@ const assets = {
 
 const config = {
     registrationLink: "https://docs.google.com/forms/d/e/1FAIpQLSfuv2Qr9uEA41A2jIkxFRHIpaUruDa_mtqoNl5q3StByTAAlQ/viewform",
+    SECRET_SALT: "SainsDataCommunity_Secure2025" // In production, this should be an env var
 };
 
 // --- COMPONENTS ---
@@ -232,6 +234,7 @@ const PythonSpeedRun = () => {
     const [playerName, setPlayerName] = useState('');
     const [leaderboard, setLeaderboard] = useState([]);
     const [userAnswers, setUserAnswers] = useState([]);
+    const [streak, setStreak] = useState(0); // New: Combo Streak
 
     useEffect(() => {
         // Load leaderboard from Supabase
@@ -257,6 +260,24 @@ const PythonSpeedRun = () => {
         console.log("Submitting score for:", name);
 
         try {
+            // Generate Digital Signature
+            // MD5(score + username + SECRET_SALT)
+            // Note: In a real app, score should be calculated on server to be truly secure.
+            // But here we are signing the request to prevent simple tampering of the payload.
+            // Ideally, the server recalculates the score from answers, so this signature 
+            // mainly verifies that the 'name' and 'answers' payload hasn't been tampered with 
+            // if we were sending the score directly. 
+            // Since we are sending 'answers' and server calculates score, 
+            // we will sign the 'name' + 'answers length' (as a proxy) + SALT 
+            // OR better yet, since the server calculates the score, we don't need to sign the score.
+            // BUT, the user prompt specifically asked for: MD5(score + username + SECRET_SALT).
+            // This implies the user *thinks* we are sending the score, OR they want us to sign the *expected* score.
+            // However, our API calculates score from answers.
+            // To follow the user's request exactly, I will calculate the score locally (which we have in 'score' state)
+            // and send it ONLY for signature verification, even though server recalculates it.
+
+            const signature = MD5(score.toString() + name + config.SECRET_SALT).toString();
+
             const response = await fetch('/api/submit-score', {
                 method: 'POST',
                 headers: {
@@ -265,15 +286,20 @@ const PythonSpeedRun = () => {
                 body: JSON.stringify({
                     playerName: name,
                     answers: userAnswers,
+                    signature: signature, // Send signature
+                    clientScore: score // Send client score for verification against signature (optional, but needed for the hash match)
                 }),
             });
 
-            const result = await response.json();
+            console.log("Response status:", response.status);
 
             if (!response.ok) {
-                throw new Error(result.error || 'Failed to submit score');
+                const text = await response.text();
+                console.error("Server Error:", text);
+                throw new Error(`Server Error (${response.status}): ${text.slice(0, 50)}...`);
             }
 
+            const result = await response.json();
             console.log("Score submitted successfully:", result);
 
             // Update local score with server-validated score
@@ -289,7 +315,11 @@ const PythonSpeedRun = () => {
 
         } catch (error) {
             console.error("Error saving score:", error);
-            alert(`Gagal menyimpan skor: ${error.message}`);
+            let msg = error.message;
+            if (msg.includes("Unexpected end of JSON input") || msg.includes("Server Error (404)")) {
+                msg = "API tidak jalan di localhost biasa. Gunakan 'vercel dev' atau deploy ke Vercel.";
+            }
+            alert(`Gagal menyimpan skor: ${msg}`);
         }
     };
 
@@ -314,6 +344,7 @@ const PythonSpeedRun = () => {
         setTimeLeft(60);
         setCurrentQuestionIndex(0);
         setUserAnswers([]);
+        setStreak(0);
     };
 
     useEffect(() => {
@@ -325,7 +356,7 @@ const PythonSpeedRun = () => {
             saveScore();
         }
         return () => clearInterval(timer);
-    }, [gameState, timeLeft, score]);
+    }, [gameState, timeLeft]);
 
     const handleAnswer = (index) => {
         // Record answer
@@ -336,9 +367,21 @@ const PythonSpeedRun = () => {
         }]);
 
         if (index === currentQuestion.answer) {
-            setScore((prev) => prev + 10); // Optimistic update for UI
+            // Calculate Points
+            let points = 10;
+            if (currentQuestion.difficulty === 'Medium') points = 13;
+            if (currentQuestion.difficulty === 'Hard') points = 16;
+
+            // Combo Bonus: +2 for every streak beyond 1
+            const currentStreak = streak + 1;
+            const comboBonus = (currentStreak - 1) * 2;
+            const totalPoints = points + comboBonus;
+
+            setScore((prev) => prev + totalPoints);
+            setStreak(currentStreak);
             setFeedback('correct');
         } else {
+            setStreak(0); // Reset Streak
             setFeedback('wrong');
         }
 
@@ -363,6 +406,7 @@ const PythonSpeedRun = () => {
         setGameQuestions([]);
         setPlayerName('');
         setUserAnswers([]);
+        setStreak(0);
     };
 
     return (
@@ -442,6 +486,11 @@ const PythonSpeedRun = () => {
                             <div className="w-full max-w-lg">
                                 <div className="flex justify-between mb-8 text-lg font-bold border-b border-slate-700 pb-4">
                                     <span className="text-blue-400">Score: {score}</span>
+                                    {streak > 1 && (
+                                        <span className="text-orange-400 animate-pulse font-bold">
+                                            COMBO x{streak}! (+{(streak - 1) * 2})
+                                        </span>
+                                    )}
                                     <span className={`${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-yellow-400'}`}>
                                         Time: {timeLeft}s
                                     </span>
@@ -539,7 +588,6 @@ const PythonSpeedRun = () => {
         </section>
     );
 };
-
 
 const Roadmap = () => {
     const steps = [
