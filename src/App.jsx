@@ -231,6 +231,7 @@ const PythonSpeedRun = () => {
     const [gameQuestions, setGameQuestions] = useState([]);
     const [playerName, setPlayerName] = useState('');
     const [leaderboard, setLeaderboard] = useState([]);
+    const [userAnswers, setUserAnswers] = useState([]);
 
     useEffect(() => {
         // Load leaderboard from Supabase
@@ -251,20 +252,33 @@ const PythonSpeedRun = () => {
         fetchLeaderboard();
     }, []);
 
-    const saveScore = async (finalScore) => {
+    const saveScore = async () => {
         const name = playerName || 'Anonymous';
-        console.log("Saving score for:", name, finalScore);
+        console.log("Submitting score for:", name);
 
-        // Insert into Supabase
-        const { error } = await supabase
-            .from('leaderboard')
-            .insert([{ name: name, score: finalScore }]);
+        try {
+            const response = await fetch('/api/submit-score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    playerName: name,
+                    answers: userAnswers,
+                }),
+            });
 
-        if (error) {
-            console.error("Error saving score:", error);
-            // Show the specific error message to the user
-            alert(`Gagal menyimpan skor: ${error.message || JSON.stringify(error)}\n\nTips: Cek apakah RLS di Supabase sudah dimatikan atau Policy sudah dibuat.`);
-        } else {
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to submit score');
+            }
+
+            console.log("Score submitted successfully:", result);
+
+            // Update local score with server-validated score
+            setScore(result.score);
+
             // Refresh leaderboard
             const { data } = await supabase
                 .from('leaderboard')
@@ -272,6 +286,10 @@ const PythonSpeedRun = () => {
                 .order('score', { ascending: false })
                 .limit(5);
             if (data) setLeaderboard(data);
+
+        } catch (error) {
+            console.error("Error saving score:", error);
+            alert(`Gagal menyimpan skor: ${error.message}`);
         }
     };
 
@@ -295,6 +313,7 @@ const PythonSpeedRun = () => {
         setScore(0);
         setTimeLeft(60);
         setCurrentQuestionIndex(0);
+        setUserAnswers([]);
     };
 
     useEffect(() => {
@@ -303,14 +322,21 @@ const PythonSpeedRun = () => {
             timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
         } else if (timeLeft === 0 && gameState === 'playing') {
             setGameState('finished');
-            saveScore(score);
+            saveScore();
         }
         return () => clearInterval(timer);
     }, [gameState, timeLeft, score]);
 
     const handleAnswer = (index) => {
-        if (index === gameQuestions[currentQuestionIndex].answer) {
-            setScore((prev) => prev + 10);
+        // Record answer
+        const currentQuestion = gameQuestions[currentQuestionIndex];
+        setUserAnswers(prev => [...prev, {
+            questionId: currentQuestion.id,
+            selectedAnswerIndex: index
+        }]);
+
+        if (index === currentQuestion.answer) {
+            setScore((prev) => prev + 10); // Optimistic update for UI
             setFeedback('correct');
         } else {
             setFeedback('wrong');
@@ -336,6 +362,7 @@ const PythonSpeedRun = () => {
         setCurrentQuestionIndex(0);
         setGameQuestions([]);
         setPlayerName('');
+        setUserAnswers([]);
     };
 
     return (
