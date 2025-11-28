@@ -19,11 +19,14 @@ import {
 import heroImage from './assets/Yuni_Shingyouji.jpg';
 import certificateImage from './assets/sertifikat_course_86_4086292_221024122021_page-0001.jpg';
 import communityPhoto from './assets/Lego The Matrix.jpg';
+import logo from './assets/logo.jpg';
+import bankSoal from './data/bank_soal';
+import { supabase } from './lib/supabaseClient';
 
 // --- CONFIGURATION & ASSETS ---
 const assets = {
     // Ganti URL ini nanti dengan link gambar asli
-    logo: "/api/placeholder/150/50",
+    logo: logo,
     heroImage: heroImage,
     certificateImage: certificateImage,
     communityPhoto: communityPhoto,
@@ -51,9 +54,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                            S
-                        </div>
+                        <img src={assets.logo} alt="SaDaCom Logo" className="w-8 h-8 rounded-lg object-cover" />
                         <span className="font-bold text-xl text-slate-900 dark:text-white">SaDaCom</span>
                     </div>
 
@@ -222,33 +223,93 @@ const Hero = () => {
 };
 
 const PythonSpeedRun = () => {
-    const [gameState, setGameState] = useState('start'); // start, playing, finished
+    const [gameState, setGameState] = useState('start'); // start, inputName, playing, finished
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null); // correct, wrong
+    const [gameQuestions, setGameQuestions] = useState([]);
+    const [playerName, setPlayerName] = useState('');
+    const [leaderboard, setLeaderboard] = useState([]);
 
-    const questions = [
-        { q: "Cetak 'Hello World' di Python?", options: ["print('Hello World')", "echo 'Hello World'", "console.log('Hello World')"], a: 0 },
-        { q: "Tipe data untuk angka bulat?", options: ["float", "int", "str"], a: 1 },
-        { q: "Cara membuat list kosong?", options: ["list = ()", "list = []", "list = {}"], a: 1 },
-        { q: "Operator untuk pangkat?", options: ["^", "**", "//"], a: 1 },
-        { q: "Keyword untuk fungsi?", options: ["func", "def", "function"], a: 1 },
-        { q: "Library untuk Data Science?", options: ["React", "Pandas", "Laravel"], a: 1 },
-    ];
+    useEffect(() => {
+        // Load leaderboard from Supabase
+        const fetchLeaderboard = async () => {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(5);
+
+            if (data) {
+                setLeaderboard(data);
+            } else if (error) {
+                console.error("Error fetching leaderboard:", error);
+            }
+        };
+
+        fetchLeaderboard();
+    }, []);
+
+    const saveScore = async (finalScore) => {
+        const name = playerName || 'Anonymous';
+        console.log("Saving score for:", name, finalScore);
+
+        // Insert into Supabase
+        const { error } = await supabase
+            .from('leaderboard')
+            .insert([{ name: name, score: finalScore }]);
+
+        if (error) {
+            console.error("Error saving score:", error);
+            // Show the specific error message to the user
+            alert(`Gagal menyimpan skor: ${error.message || JSON.stringify(error)}\n\nTips: Cek apakah RLS di Supabase sudah dimatikan atau Policy sudah dibuat.`);
+        } else {
+            // Refresh leaderboard
+            const { data } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(5);
+            if (data) setLeaderboard(data);
+        }
+    };
+
+    // Function to shuffle array
+    const shuffleQuestions = () => {
+        return [...bankSoal].sort(() => 0.5 - Math.random());
+    };
+
+    const handleStartClick = () => {
+        setGameState('inputName');
+    };
+
+    const startGame = () => {
+        if (!playerName.trim()) {
+            alert("Masukkan nama kamu dulu ya!");
+            return;
+        }
+        const selectedQuestions = shuffleQuestions();
+        setGameQuestions(selectedQuestions);
+        setGameState('playing');
+        setScore(0);
+        setTimeLeft(60);
+        setCurrentQuestionIndex(0);
+    };
 
     useEffect(() => {
         let timer;
         if (gameState === 'playing' && timeLeft > 0) {
             timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-        } else if (timeLeft === 0) {
+        } else if (timeLeft === 0 && gameState === 'playing') {
             setGameState('finished');
+            saveScore(score);
         }
         return () => clearInterval(timer);
-    }, [gameState, timeLeft]);
+    }, [gameState, timeLeft, score]);
 
     const handleAnswer = (index) => {
-        if (index === questions[currentQuestionIndex].a) {
+        if (index === gameQuestions[currentQuestionIndex].answer) {
             setScore((prev) => prev + 10);
             setFeedback('correct');
         } else {
@@ -257,10 +318,13 @@ const PythonSpeedRun = () => {
 
         setTimeout(() => {
             setFeedback(null);
-            if (currentQuestionIndex < questions.length - 1) {
+            // Endless Mode Logic
+            if (currentQuestionIndex < gameQuestions.length - 1) {
                 setCurrentQuestionIndex((prev) => prev + 1);
             } else {
-                setGameState('finished');
+                // Reshuffle and restart index to loop questions
+                setGameQuestions(shuffleQuestions());
+                setCurrentQuestionIndex(0);
             }
         }, 500);
     };
@@ -270,6 +334,8 @@ const PythonSpeedRun = () => {
         setScore(0);
         setTimeLeft(60);
         setCurrentQuestionIndex(0);
+        setGameQuestions([]);
+        setPlayerName('');
     };
 
     return (
@@ -292,19 +358,60 @@ const PythonSpeedRun = () => {
                     {/* Terminal Body */}
                     <div className="p-8 min-h-[400px] flex flex-col items-center justify-center text-green-400">
                         {gameState === 'start' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center w-full">
                                 <Terminal size={64} className="mx-auto mb-6 text-blue-500" />
                                 <h3 className="text-2xl font-bold mb-6 text-white">Siap menjadi Python Master?</h3>
+
+                                <div className="flex justify-center mb-8">
+                                    <button
+                                        onClick={handleStartClick}
+                                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition-all flex items-center gap-2"
+                                    >
+                                        <Play size={20} /> Mulai Game
+                                    </button>
+                                </div>
+
+                                {/* Leaderboard Preview */}
+                                {leaderboard.length > 0 && (
+                                    <div className="max-w-md mx-auto bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                                        <h4 className="text-yellow-400 font-bold mb-3 flex items-center justify-center gap-2">
+                                            <Award size={16} /> Top 5 Leaderboard
+                                        </h4>
+                                        <div className="space-y-2">
+                                            {leaderboard.map((entry, idx) => (
+                                                <div key={idx} className="flex justify-between text-sm text-slate-300 border-b border-slate-700/50 pb-1 last:border-0">
+                                                    <span>{idx + 1}. {entry.name}</span>
+                                                    <span className="font-mono text-green-400">{entry.score} pts</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+
+                        {gameState === 'inputName' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center w-full max-w-md">
+                                <h3 className="text-xl font-bold mb-6 text-white">Masukkan Nama Kamu</h3>
+                                <input
+                                    type="text"
+                                    value={playerName}
+                                    onChange={(e) => setPlayerName(e.target.value)}
+                                    placeholder="Nama / Nickname"
+                                    className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white mb-6 focus:outline-none focus:border-blue-500 text-center text-lg"
+                                    onKeyDown={(e) => e.key === 'Enter' && startGame()}
+                                    autoFocus
+                                />
                                 <button
-                                    onClick={() => setGameState('playing')}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition-all flex items-center mx-auto gap-2"
+                                    onClick={startGame}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition-all w-full"
                                 >
-                                    <Play size={20} /> Mulai Game
+                                    Mulai!
                                 </button>
                             </motion.div>
                         )}
 
-                        {gameState === 'playing' && (
+                        {gameState === 'playing' && gameQuestions.length > 0 && (
                             <div className="w-full max-w-lg">
                                 <div className="flex justify-between mb-8 text-lg font-bold border-b border-slate-700 pb-4">
                                     <span className="text-blue-400">Score: {score}</span>
@@ -314,16 +421,25 @@ const PythonSpeedRun = () => {
                                 </div>
 
                                 <div className="mb-8">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="text-slate-400 text-sm">Question {score / 10 + 1}</span>
+                                        <span className={`text-xs px-2 py-1 rounded ${gameQuestions[currentQuestionIndex].difficulty === 'Easy' ? 'bg-green-900 text-green-300' :
+                                            gameQuestions[currentQuestionIndex].difficulty === 'Medium' ? 'bg-yellow-900 text-yellow-300' :
+                                                'bg-red-900 text-red-300'
+                                            }`}>
+                                            {gameQuestions[currentQuestionIndex].difficulty}
+                                        </span>
+                                    </div>
                                     <p className="text-xl text-white mb-6">
-                                        <span className="text-blue-500">>>></span> {questions[currentQuestionIndex].q}
+                                        <span className="text-blue-500">{'>>>'}</span> {gameQuestions[currentQuestionIndex].question}
                                     </p>
                                     <div className="grid gap-4">
-                                        {questions[currentQuestionIndex].options.map((opt, idx) => (
+                                        {gameQuestions[currentQuestionIndex].options.map((opt, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => handleAnswer(idx)}
                                                 className={`w-full text-left px-4 py-3 rounded border transition-all ${feedback
-                                                    ? idx === questions[currentQuestionIndex].a
+                                                    ? idx === gameQuestions[currentQuestionIndex].answer
                                                         ? 'bg-green-900/50 border-green-500 text-green-200'
                                                         : 'bg-red-900/50 border-red-500 text-red-200'
                                                     : 'bg-slate-800 border-slate-700 hover:bg-slate-700 hover:border-blue-500 text-slate-300'
@@ -339,10 +455,39 @@ const PythonSpeedRun = () => {
                         )}
 
                         {gameState === 'finished' && (
-                            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-center">
+                            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-center w-full">
                                 <Award size={64} className="mx-auto mb-6 text-yellow-500" />
                                 <h3 className="text-3xl font-bold mb-2 text-white">Game Over!</h3>
-                                <p className="text-xl text-slate-300 mb-8">Skor Akhir: <span className="text-green-400 font-bold">{score}</span></p>
+                                <p className="text-xl text-slate-300 mb-8">
+                                    Hebat {playerName}! Skor Akhir: <span className="text-green-400 font-bold">{score}</span>
+                                </p>
+
+                                {/* Leaderboard Table */}
+                                <div className="max-w-md mx-auto bg-slate-800/50 rounded-lg p-6 border border-slate-700 mb-8">
+                                    <h4 className="text-yellow-400 font-bold mb-4 flex items-center justify-center gap-2">
+                                        <Award size={20} /> Leaderboard
+                                    </h4>
+                                    <div className="space-y-3">
+                                        {leaderboard.map((entry, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`flex justify-between items-center p-2 rounded ${entry.name === playerName && entry.score === score ? 'bg-blue-900/30 border border-blue-500/30' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${idx === 0 ? 'bg-yellow-500 text-black' :
+                                                        idx === 1 ? 'bg-slate-400 text-black' :
+                                                            idx === 2 ? 'bg-orange-700 text-white' : 'bg-slate-700 text-slate-300'
+                                                        }`}>
+                                                        {idx + 1}
+                                                    </span>
+                                                    <span className="text-slate-200 font-medium">{entry.name}</span>
+                                                </div>
+                                                <span className="font-mono text-green-400 font-bold">{entry.score}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className="flex gap-4 justify-center">
                                     <button
                                         onClick={resetGame}
@@ -367,6 +512,7 @@ const PythonSpeedRun = () => {
         </section>
     );
 };
+
 
 const Roadmap = () => {
     const steps = [
@@ -500,9 +646,7 @@ const Footer = () => {
         <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                        S
-                    </div>
+                    <img src={assets.logo} alt="SaDaCom Logo" className="w-8 h-8 rounded-lg object-cover" />
                     <span className="font-bold text-xl text-slate-900 dark:text-white">SaDaCom</span>
                 </div>
 
