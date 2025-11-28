@@ -184,12 +184,18 @@ export default async function handler(req, res) {
 
     // Initialize Supabase client with Service Role Key for secure write access
     // NOTE: SUPABASE_SERVICE_ROLE_KEY must be set in Vercel Environment Variables
-    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('Missing Supabase environment variables');
-        return res.status(500).json({ error: 'Server configuration error' });
+        console.error('Server Config Error:');
+        if (!supabaseUrl) console.error('- Missing SUPABASE_URL');
+        if (!supabaseServiceKey) console.error('- Missing SUPABASE_SERVICE_ROLE_KEY');
+
+        return res.status(500).json({
+            error: 'Server configuration error',
+            details: 'Missing environment variables. Check Vercel logs.'
+        });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
