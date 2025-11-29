@@ -240,7 +240,7 @@ const NewsSection = () => {
                 <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl"></div>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10">
+            <div className="container mx-auto px-8 md:px-16 lg:px-24 relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -265,7 +265,7 @@ const NewsSection = () => {
                         {showLeftArrow && (
                             <button
                                 onClick={() => scroll('left')}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover/carousel:opacity-100 -ml-4 md:-ml-6"
+                                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover/carousel:opacity-100 -ml-4 md:-ml-12"
                             >
                                 <ChevronLeft size={24} />
                             </button>
@@ -273,24 +273,24 @@ const NewsSection = () => {
                         {showRightArrow && (
                             <button
                                 onClick={() => scroll('right')}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover/carousel:opacity-100 -mr-4 md:-mr-6"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover/carousel:opacity-100 -mr-4 md:-mr-12"
                             >
                                 <ChevronRight size={24} />
                             </button>
                         )}
 
-                        {/* Shadow Indicators */}
+                        {/* Shadow Indicators - Hidden on Mobile */}
                         {showLeftArrow && (
-                            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-900 to-transparent z-10 pointer-events-none"></div>
+                            <div className="hidden md:block absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-900 to-transparent z-10 pointer-events-none"></div>
                         )}
                         {showRightArrow && (
-                            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-900 to-transparent z-10 pointer-events-none"></div>
+                            <div className="hidden md:block absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-900 to-transparent z-10 pointer-events-none"></div>
                         )}
 
                         {/* Carousel Container */}
                         <div
                             ref={scrollContainerRef}
-                            className="flex overflow-x-auto gap-6 snap-x snap-mandatory scrollbar-hide pb-8 -mx-4 px-4 scroll-smooth"
+                            className="flex overflow-x-auto gap-6 snap-x snap-mandatory scrollbar-hide pb-8 px-2 scroll-smooth"
                         >
                             {news.map((item, index) => (
                                 <motion.div
@@ -298,10 +298,10 @@ const NewsSection = () => {
                                     initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="min-w-[100%] md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10 flex flex-col h-full"
+                                    className="min-w-[85%] md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] snap-center bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10 flex flex-col h-full"
                                 >
-                                    {/* Image Container */}
-                                    <div className="relative h-48 overflow-hidden shrink-0">
+                                    {/* Image Container - Reduced Height */}
+                                    <div className="relative h-36 overflow-hidden shrink-0">
                                         <img
                                             src={item.image_url || 'https://via.placeholder.com/400x200?text=SaDaCom+News'}
                                             alt={item.title}
@@ -311,38 +311,38 @@ const NewsSection = () => {
                                                 e.target.src = 'https://via.placeholder.com/400x200?text=Image+Not+Found';
                                             }}
                                         />
-                                        <div className="absolute top-4 left-4">
-                                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-cyan-400 text-xs font-semibold rounded-full border border-cyan-500/30 flex items-center gap-1">
-                                                <Tag size={12} />
+                                        <div className="absolute top-3 left-3">
+                                            <span className="px-2 py-0.5 bg-black/60 backdrop-blur-md text-cyan-400 text-[10px] font-semibold rounded-full border border-cyan-500/30 flex items-center gap-1">
+                                                <Tag size={10} />
                                                 {item.category || 'General'}
                                             </span>
                                         </div>
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="p-6 flex flex-col flex-grow">
-                                        <div className="flex items-center gap-2 text-gray-500 text-xs mb-3">
-                                            <Calendar size={14} />
+                                    {/* Content - Reduced Padding */}
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <div className="flex items-center gap-2 text-gray-500 text-[10px] mb-2">
+                                            <Calendar size={12} />
                                             <span>{new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                                         </div>
 
-                                        <h3 className="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
+                                        <h3 className="text-lg font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
                                             {item.title}
                                         </h3>
 
                                         {item.subtitle && (
-                                            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                                            <p className="text-gray-400 text-xs mb-3 line-clamp-2">
                                                 {item.subtitle}
                                             </p>
                                         )}
 
                                         <div className="flex-grow">
-                                            <p className="text-gray-300 text-sm line-clamp-3 mb-1">
+                                            <p className="text-gray-300 text-xs line-clamp-3 mb-1">
                                                 {item.content}
                                             </p>
                                             <button
                                                 onClick={() => setSelectedNews(item)}
-                                                className="text-cyan-400 text-xs hover:text-cyan-300 hover:underline transition-colors"
+                                                className="text-cyan-400 text-[10px] hover:text-cyan-300 hover:underline transition-colors"
                                             >
                                                 Baca Selengkapnya
                                             </button>
@@ -350,14 +350,14 @@ const NewsSection = () => {
 
                                         {/* Countdown Timer */}
                                         {item.registration_deadline && (
-                                            <div className="mt-4">
+                                            <div className="mt-3">
                                                 <CountdownTimer deadline={item.registration_deadline} />
                                             </div>
                                         )}
 
                                         {/* CTA Button - Always Visible */}
                                         {item.cta_link && (
-                                            <div className="mt-6 pt-4 border-t border-gray-700/50">
+                                            <div className="mt-4 pt-3 border-t border-gray-700/50">
                                                 <a
                                                     href={item.cta_link}
                                                     target="_blank"
