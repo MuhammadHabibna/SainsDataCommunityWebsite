@@ -47,6 +47,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
     const navLinks = [
         { name: 'Home', href: '#home' },
+        { name: 'Announcement', href: '#announcement' },
         { name: 'Roadmap', href: '#roadmap' },
         { name: 'Game', href: '#game' },
         { name: 'Benefit', href: '#benefit' },

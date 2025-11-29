@@ -233,7 +233,7 @@ const NewsSection = () => {
     }
 
     return (
-        <section className="py-20 bg-gray-900 text-white relative overflow-hidden">
+        <section id="announcement" className="py-20 bg-gray-900 text-white relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
