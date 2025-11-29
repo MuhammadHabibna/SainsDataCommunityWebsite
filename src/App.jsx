@@ -22,6 +22,7 @@ import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
 import bankSoal from './data/bank_soal';
 import { supabase } from './lib/supabaseClient';
+import NewsSection from './components/NewsSection';
 // MD5 import removed for security
 
 
@@ -714,7 +715,7 @@ const Footer = () => {
                 <div className="text-slate-500 dark:text-slate-400 text-sm text-center md:text-right">
                     <p>&copy; {new Date().getFullYear()} Sains Data Community. All rights reserved.</p>
                     <div className="flex gap-4 justify-center md:justify-end mt-4">
-                        <a href="#" className="hover:text-blue-600 transition-colors">Instagram</a>
+                        <a href="https://www.instagram.com/sadacommunity?igsh=MThyZXpvZXB6Ym9mNw==" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">Instagram</a>
                         <a href="#" className="hover:text-blue-600 transition-colors">LinkedIn</a>
                         <a href="#" className="hover:text-blue-600 transition-colors">Discord</a>
                     </div>
@@ -740,6 +741,7 @@ function App() {
             <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
             <main>
                 <Hero />
+                <NewsSection />
                 <Roadmap />
                 <PythonSpeedRun />
                 <CertificateShowcase />
