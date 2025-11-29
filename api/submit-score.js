@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+// crypto import removed
+
 
 // Copy of the questions for server-side validation
 // In a larger app, this should be shared or fetched from a database
@@ -428,18 +429,10 @@ export default async function handler(req, res) {
         }
     }
 
-    // DIGITAL SIGNATURE VERIFICATION
-    const { signature } = req.body;
-    const SECRET_SALT = "SainsDataCommunity_Secure2025"; // In production, use process.env.SECRET_SALT
+    // DIGITAL SIGNATURE VERIFICATION REMOVED
+    // We trust the score because WE calculated it right here on the server.
+    // The client only sent the answers.
 
-    // Server re-calculates signature: MD5(score + username + SALT)
-    // We use the server-calculated score to ensure the score matches the answers
-    const serverSignature = crypto.createHash('md5').update(calculatedScore.toString() + playerName + SECRET_SALT).digest("hex");
-
-    if (signature !== serverSignature) {
-        console.warn(`Invalid signature for user ${playerName}. Expected ${serverSignature}, got ${signature}`);
-        return res.status(403).json({ error: 'Invalid Signature/Data Tampered' });
-    }
 
     // Initialize Supabase client with Service Role Key for secure write access
     // NOTE: SUPABASE_SERVICE_ROLE_KEY must be set in Vercel Environment Variables

@@ -22,7 +22,8 @@ import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
 import bankSoal from './data/bank_soal';
 import { supabase } from './lib/supabaseClient';
-import { MD5 } from 'crypto-js';
+// MD5 import removed for security
+
 
 // --- CONFIGURATION & ASSETS ---
 const assets = {
@@ -35,7 +36,7 @@ const assets = {
 
 const config = {
     registrationLink: "https://docs.google.com/forms/d/e/1FAIpQLSfuv2Qr9uEA41A2jIkxFRHIpaUruDa_mtqoNl5q3StByTAAlQ/viewform",
-    SECRET_SALT: "SainsDataCommunity_Secure2025" // In production, this should be an env var
+    // SECRET_SALT removed from client-side config for security
 };
 
 // --- COMPONENTS ---
@@ -260,23 +261,10 @@ const PythonSpeedRun = () => {
         console.log("Submitting score for:", name);
 
         try {
-            // Generate Digital Signature
-            // MD5(score + username + SECRET_SALT)
-            // Note: In a real app, score should be calculated on server to be truly secure.
-            // But here we are signing the request to prevent simple tampering of the payload.
-            // Ideally, the server recalculates the score from answers, so this signature 
-            // mainly verifies that the 'name' and 'answers' payload hasn't been tampered with 
-            // if we were sending the score directly. 
-            // Since we are sending 'answers' and server calculates score, 
-            // we will sign the 'name' + 'answers length' (as a proxy) + SALT 
-            // OR better yet, since the server calculates the score, we don't need to sign the score.
-            // BUT, the user prompt specifically asked for: MD5(score + username + SECRET_SALT).
-            // This implies the user *thinks* we are sending the score, OR they want us to sign the *expected* score.
-            // However, our API calculates score from answers.
-            // To follow the user's request exactly, I will calculate the score locally (which we have in 'score' state)
-            // and send it ONLY for signature verification, even though server recalculates it.
-
-            const signature = MD5(score.toString() + name + config.SECRET_SALT).toString();
+            // Security Update:
+            // We no longer send a client-side signature or score.
+            // The server will calculate the score purely based on the answers provided.
+            // This prevents users from tampering with the score or forging signatures.
 
             const response = await fetch('/api/submit-score', {
                 method: 'POST',
@@ -286,8 +274,6 @@ const PythonSpeedRun = () => {
                 body: JSON.stringify({
                     playerName: name,
                     answers: userAnswers,
-                    signature: signature, // Send signature
-                    clientScore: score // Send client score for verification against signature (optional, but needed for the hash match)
                 }),
             });
 
