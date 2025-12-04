@@ -229,6 +229,52 @@ const PythonSpeedRun = () => {
     const [gameState, setGameState] = useState('start'); // start, inputName, playing, finished
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [feedback, setFeedback] = useState(null); // correct, wrong
+    const [gameQuestions, setGameQuestions] = useState([]);
+    const [playerName, setPlayerName] = useState('');
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [streak, setStreak] = useState(0); // New: Combo Streak
+    const [allQuestions, setAllQuestions] = useState([]); // New
+    const [loadingQuestions, setLoadingQuestions] = useState(true); // New
+
+    // --- FETCH QUESTIONS ---
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await fetch('/api/questions');
+                if (!response.ok) throw new Error('Failed to fetch questions');
+                const data = await response.json();
+                setAllQuestions(data);
+                setLoadingQuestions(false);
+            } catch (error) {
+                console.error("Error loading questions:", error);
+                setLoadingQuestions(false);
+            }
+        };
+
+        fetchQuestions();
+    }, []);
+
+    useEffect(() => {
+        // Load leaderboard from Supabase
+        const fetchLeaderboard = async () => {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(5);
+
+            if (data) {
+                setLeaderboard(data);
+            } else if (error) {
+                console.error("Error fetching leaderboard:", error);
+            }
+        };
+
+        fetchLeaderboard();
+    }, []);
     const saveScore = async () => {
         const name = playerName || 'Anonymous';
         console.log("Submitting score for:", name);
@@ -286,7 +332,7 @@ const PythonSpeedRun = () => {
 
     // Function to shuffle array
     const shuffleQuestions = () => {
-        return [...bankSoal].sort(() => 0.5 - Math.random());
+        return [...allQuestions].sort(() => 0.5 - Math.random());
     };
 
     const handleStartClick = () => {
@@ -294,6 +340,11 @@ const PythonSpeedRun = () => {
     };
 
     const startGame = () => {
+        if (loadingQuestions || allQuestions.length === 0) {
+            alert("Sedang memuat soal, harap tunggu...");
+            return;
+        }
+
         if (!playerName.trim()) {
             alert("Masukkan nama kamu dulu ya!");
             return;
