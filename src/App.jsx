@@ -23,7 +23,7 @@ import logo from './assets/logo.jpg';
 import bankSoal from './data/bank_soal';
 import { supabase } from './lib/supabaseClient';
 import NewsSection from './components/NewsSection';
-// MD5 import removed for security
+import { MD5 } from 'crypto-js';
 
 
 // --- CONFIGURATION & ASSETS ---
@@ -264,14 +264,16 @@ const PythonSpeedRun = () => {
 
         try {
             // Security Update:
-            // We no longer send a client-side signature or score.
-            // The server will calculate the score purely based on the answers provided.
-            // This prevents users from tampering with the score or forging signatures.
+            // We send a signature to verify the request integrity.
+            const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
+            const payload = name + JSON.stringify(userAnswers) + SECRET_SALT;
+            const signature = MD5(payload).toString();
 
             const response = await fetch('/api/submit-score', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-signature': signature
                 },
                 body: JSON.stringify({
                     playerName: name,
@@ -354,7 +356,11 @@ const PythonSpeedRun = () => {
             selectedAnswerIndex: index
         }]);
 
-        if (index === currentQuestion.answer) {
+        // Security Update: Verify using Hash
+        const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
+        const checkHash = MD5(`${currentQuestion.id}-${index}-${SECRET_SALT}`).toString();
+
+        if (checkHash === currentQuestion.answerHash) {
             // Calculate Points
             let points = 10;
             if (currentQuestion.difficulty === 'Medium') points = 13;
