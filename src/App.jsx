@@ -20,11 +20,9 @@ import heroImage from './assets/Yuni_Shingyouji.jpg';
 import certificateImage from './assets/sertifikat_course_86_4086292_221024122021_page-0001.jpg';
 import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
-import bankSoal from './data/bank_soal';
 import { supabase } from './lib/supabaseClient';
 import NewsSection from './components/NewsSection';
-import { MD5 } from 'crypto-js';
-
+import CryptoJS from 'crypto-js';
 
 // --- CONFIGURATION & ASSETS ---
 const assets = {
@@ -231,33 +229,6 @@ const PythonSpeedRun = () => {
     const [gameState, setGameState] = useState('start'); // start, inputName, playing, finished
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [feedback, setFeedback] = useState(null); // correct, wrong
-    const [gameQuestions, setGameQuestions] = useState([]);
-    const [playerName, setPlayerName] = useState('');
-    const [leaderboard, setLeaderboard] = useState([]);
-    const [userAnswers, setUserAnswers] = useState([]);
-    const [streak, setStreak] = useState(0); // New: Combo Streak
-
-    useEffect(() => {
-        // Load leaderboard from Supabase
-        const fetchLeaderboard = async () => {
-            const { data, error } = await supabase
-                .from('leaderboard')
-                .select('*')
-                .order('score', { ascending: false })
-                .limit(5);
-
-            if (data) {
-                setLeaderboard(data);
-            } else if (error) {
-                console.error("Error fetching leaderboard:", error);
-            }
-        };
-
-        fetchLeaderboard();
-    }, []);
-
     const saveScore = async () => {
         const name = playerName || 'Anonymous';
         console.log("Submitting score for:", name);
@@ -267,7 +238,7 @@ const PythonSpeedRun = () => {
             // We send a signature to verify the request integrity.
             const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
             const payload = name + JSON.stringify(userAnswers) + SECRET_SALT;
-            const signature = MD5(payload).toString();
+            const signature = CryptoJS.MD5(payload).toString();
 
             const response = await fetch('/api/submit-score', {
                 method: 'POST',
@@ -358,7 +329,8 @@ const PythonSpeedRun = () => {
 
         // Security Update: Verify using Hash
         const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
-        const checkHash = MD5(`${currentQuestion.id}-${index}-${SECRET_SALT}`).toString();
+        const payload = `${currentQuestion.id}-${index}-${SECRET_SALT}`;
+        const checkHash = CryptoJS.MD5(payload).toString();
 
         if (checkHash === currentQuestion.answerHash) {
             // Calculate Points
@@ -509,7 +481,7 @@ const PythonSpeedRun = () => {
                                                 key={idx}
                                                 onClick={() => handleAnswer(idx)}
                                                 className={`w-full text-left px-4 py-3 rounded border transition-all ${feedback
-                                                    ? idx === gameQuestions[currentQuestionIndex].answer
+                                                    ? CryptoJS.MD5(`${gameQuestions[currentQuestionIndex].id}-${idx}-SADACOM_SECRET_SALT_2024`).toString() === gameQuestions[currentQuestionIndex].answerHash
                                                         ? 'bg-green-900/50 border-green-500 text-green-200'
                                                         : 'bg-red-900/50 border-red-500 text-red-200'
                                                     : 'bg-slate-800 border-slate-700 hover:bg-slate-700 hover:border-blue-500 text-slate-300'
