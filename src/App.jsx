@@ -22,6 +22,7 @@ import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
 import { supabase } from './lib/supabaseClient';
 import NewsSection from './components/NewsSection';
+import StatsSection from './components/StatsSection';
 import CryptoJS from 'crypto-js';
 
 // --- CONFIGURATION & ASSETS ---
@@ -772,6 +773,7 @@ function App() {
             <main>
                 <Hero />
                 <NewsSection />
+                <StatsSection />
                 <Roadmap />
                 <PythonSpeedRun />
                 <CertificateShowcase />
