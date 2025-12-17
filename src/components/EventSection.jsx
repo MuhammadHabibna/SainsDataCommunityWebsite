@@ -60,26 +60,26 @@ const CountdownTimer = ({ deadline }) => {
         <div className="py-2 px-0 text-center w-full">
             {timerComponents.length ? (
                 <div className="text-sm font-mono text-cyan-600 dark:text-cyan-400 flex flex-col items-center">
-                    <span className="block text-xs text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider font-bold">Pendaftaran Ditutup dalam:</span>
-                    <div className="flex gap-4 justify-center">
-                        <div className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{timeLeft.days}</span>
-                            <span className="text-[10px] uppercase text-slate-400 font-bold mt-1">Hari</span>
+                    <span className="block text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider font-bold">Pendaftaran Ditutup dalam:</span>
+                    <div className="flex gap-2 md:gap-4 justify-center">
+                        <div className="flex flex-col items-center p-2 md:p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[50px] md:min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{timeLeft.days}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase text-slate-400 font-bold mt-1">Hari</span>
                         </div>
-                        <span className="text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
-                        <div className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.hours).padStart(2, '0')}</span>
-                            <span className="text-[10px] uppercase text-slate-400 font-bold mt-1">Jam</span>
+                        <span className="text-lg md:text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
+                        <div className="flex flex-col items-center p-2 md:p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[50px] md:min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.hours).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase text-slate-400 font-bold mt-1">Jam</span>
                         </div>
-                        <span className="text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
-                        <div className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                            <span className="text-[10px] uppercase text-slate-400 font-bold mt-1">Menit</span>
+                        <span className="text-lg md:text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
+                        <div className="flex flex-col items-center p-2 md:p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[50px] md:min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase text-slate-400 font-bold mt-1">Menit</span>
                         </div>
-                        <span className="text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
-                        <div className="flex flex-col items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                            <span className="text-[10px] uppercase text-slate-400 font-bold mt-1">Detik</span>
+                        <span className="text-lg md:text-2xl font-bold text-slate-300 dark:text-slate-600 self-center pb-2">:</span>
+                        <div className="flex flex-col items-center p-2 md:p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl min-w-[50px] md:min-w-[70px] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                            <span className="text-[8px] md:text-[10px] uppercase text-slate-400 font-bold mt-1">Detik</span>
                         </div>
                     </div>
                 </div>
@@ -474,7 +474,7 @@ const EventSection = () => {
                                                     href={featuredEvent.cta_link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-5 px-8 rounded-2xl font-bold text-center flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all text-xl tracking-tight"
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 px-6 md:py-5 md:px-8 rounded-2xl font-bold text-center flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all text-base md:text-xl tracking-tight"
                                                 >
                                                     Daftar Sekarang <ArrowRight size={24} />
                                                 </motion.a>
