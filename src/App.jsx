@@ -13,21 +13,25 @@ import {
     Play,
     RotateCcw,
     Menu,
-    X
+    X,
+    ChevronRight,
+    Sparkles,
+    Cpu,
+    Globe,
+    Layers
 } from 'lucide-react';
 
-import heroImage from './assets/Yuni_Shingyouji.jpg';
+import heroImage from './assets/Yuni_Shingyouji.jpg'; // Kept specifically if needed later, but unused in new Hero
 import certificateImage from './assets/sertifikat_course_86_4086292_221024122021_page-0001.jpg';
 import communityPhoto from './assets/Lego The Matrix.jpg';
 import logo from './assets/logo.jpg';
 import { supabase } from './lib/supabaseClient';
-import NewsSection from './components/NewsSection';
+import EventSection from './components/EventSection';
 import StatsSection from './components/StatsSection';
 import CryptoJS from 'crypto-js';
 
 // --- CONFIGURATION & ASSETS ---
 const assets = {
-    // Ganti URL ini nanti dengan link gambar asli
     logo: logo,
     heroImage: heroImage,
     certificateImage: certificateImage,
@@ -36,13 +40,21 @@ const assets = {
 
 const config = {
     registrationLink: "https://docs.google.com/forms/d/e/1FAIpQLSfuv2Qr9uEA41A2jIkxFRHIpaUruDa_mtqoNl5q3StByTAAlQ/viewform",
-    // SECRET_SALT removed from client-side config for security
 };
 
 // --- COMPONENTS ---
 
 const Navbar = ({ darkMode, toggleDarkMode }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const navLinks = [
         { name: 'Home', href: '#home' },
@@ -53,42 +65,52 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     ];
 
     return (
-        <nav className="fixed w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-blue-500/5' : 'bg-transparent'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
+                <div className="flex justify-between items-center h-20">
                     {/* Logo */}
-                    <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-                        <img src={assets.logo} alt="SaDaCom Logo" className="w-8 h-8 rounded-lg object-cover" />
-                        <span className="font-bold text-xl text-slate-900 dark:text-white">SaDaCom</span>
+                    <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo(0, 0)}>
+                        <div className="relative">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
+                            <img src={assets.logo} alt="SaDaCom Logo" className="relative w-9 h-9 rounded-lg object-cover" />
+                        </div>
+                        <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 tracking-tight">SaDaCom</span>
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    <div className="hidden md:flex items-center gap-8">
                         {navLinks.map((link) => (
                             <a
                                 key={link.name}
                                 href={link.href}
-                                className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+                                className="relative text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                             >
                                 {link.name}
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                             </a>
                         ))}
 
+                        <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+
                         <button
                             onClick={toggleDarkMode}
-                            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                            className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-yellow-400"
                         >
                             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
 
-                        <a
+                        <motion.a
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             href={config.registrationLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition-all transform hover:scale-105 shadow-lg shadow-blue-600/20"
+                            className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
                         >
-                            Daftar Sekarang
-                        </a>
+                            <span className="relative z-10 flex items-center gap-2">
+                                Daftar Sekarang <Sparkles size={16} className="text-yellow-300" />
+                            </span>
+                        </motion.a>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -101,7 +123,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </button>
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                            className="text-slate-900 dark:text-white"
                         >
                             {isOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
@@ -116,7 +138,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 overflow-hidden"
+                        className="md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 overflow-hidden"
                     >
                         <div className="px-4 pt-2 pb-6 space-y-2">
                             {navLinks.map((link) => (
@@ -124,19 +146,21 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                                     key={link.name}
                                     href={link.href}
                                     onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-900"
+                                    className="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-900"
                                 >
                                     {link.name}
                                 </a>
                             ))}
-                            <a
-                                href={config.registrationLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block w-full text-center mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg font-medium transition-colors"
-                            >
-                                Daftar Sekarang
-                            </a>
+                            <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+                                <a
+                                    href={config.registrationLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-3 rounded-xl font-bold transition-transform active:scale-95"
+                                >
+                                    Daftar Sekarang
+                                </a>
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -145,102 +169,120 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     );
 };
 
-const TypewriterEffect = ({ text }) => {
-    const [displayText, setDisplayText] = useState('');
-
-    useEffect(() => {
-        let index = 0;
-        const timer = setInterval(() => {
-            if (index <= text.length) {
-                setDisplayText(text.slice(0, index));
-                index++;
-            } else {
-                clearInterval(timer);
-            }
-        }, 50); // Speed of typing
-
-        return () => clearInterval(timer);
-    }, [text]);
-
-    return (
-        <span className="font-mono text-blue-600 dark:text-blue-400">
-            {displayText}
-            <span className="animate-pulse">|</span>
-        </span>
-    );
-};
-
 const Hero = () => {
     return (
-        <section id="home" className="pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
-                    {/* Text Content */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="mb-12 lg:mb-0 text-center lg:text-left"
-                    >
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6">
-                            Akselerasi Kariermu Menjadi <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Gen AI Engineer</span>
-                        </h1>
-                        <div className="text-xl sm:text-2xl text-slate-600 dark:text-slate-300 mb-8 h-16 sm:h-auto">
-                            <TypewriterEffect text="Komunitas Sains Data. Didukung Dicoding. 100% Gratis." />
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <a
-                                href={config.registrationLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-600/30 transform hover:-translate-y-1"
-                            >
-                                Gabung Sekarang <ArrowRight className="ml-2" size={20} />
-                            </a>
-                            <a
-                                href="#game"
-                                className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-                            >
-                                Coba Mini Game <Code2 className="ml-2" size={20} />
-                            </a>
-                        </div>
-                    </motion.div>
+        <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors py-32">
+            {/* --- ABSTRACT BACKGROUND --- */}
 
-                    {/* Image Content */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="relative"
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+
+            {/* Dynamic Mesh Gradients - SIMPLIFIED */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] opacity-30"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-500/10 dark:bg-blue-900/10 rounded-full blur-[100px] opacity-30"></div>
+            </div>
+
+            {/* --- CONTENT --- */}
+            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+
+                {/* Floating Abstract Element */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="flex justify-center mb-8"
+                >
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse"></div>
+                        <div className="relative bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl border border-white/40 dark:border-slate-700/40 rounded-full px-5 py-2 flex items-center gap-3 shadow-lg">
+                            <span className="flex h-2 w-2 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400">
+                                🚀 Komunitas Sains Data UNESA
+                            </span>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Main Typography */}
+                <motion.h1
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.1 }}
+                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter mb-8 text-slate-900 dark:text-white leading-[0.9]"
+                >
+                    Future <br />
+                    <span className="bg-clip-text text-transparent bg-[linear-gradient(to_right,theme(colors.blue.600),theme(colors.cyan.500),theme(colors.purple.600),theme(colors.blue.600))] bg-[length:200%_auto] animate-gradient font-black filter drop-shadow-sm">
+                        AI Engineer
+                    </span>
+                </motion.h1>
+
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-12 leading-relaxed"
+                >
+                    Akselerasi kariermu bersama komunitas yang didukung Dicoding. <br className="hidden md:block" />
+                    <span className="font-semibold text-slate-900 dark:text-white">Gratis</span>, terstruktur, dan terbuka untuk semua <span className="text-blue-600 dark:text-blue-400 font-bold border-b-2 border-blue-500/20 pb-0.5">mahasiswa prodi sains data UNESA</span>.
+                </motion.p>
+
+                {/* Action Buttons */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="flex flex-col sm:flex-row gap-5 justify-center items-center"
+                >
+                    <motion.a
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        href={config.registrationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-lg shadow-xl shadow-slate-900/20 dark:shadow-white/10 overflow-hidden flex items-center gap-3 transition-all"
                     >
-                        <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur-2xl opacity-30 animate-pulse"></div>
-                        <img
-                            src={assets.heroImage}
-                            alt="Suasana Coding SaDaCom"
-                            className="relative rounded-2xl shadow-2xl w-full object-cover aspect-[4/3] border-4 border-white dark:border-slate-800"
-                        />
-                    </motion.div>
-                </div>
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+                        <Sparkles size={20} className="text-yellow-400" />
+                        Gabung Sekarang
+                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </motion.a>
+
+                    <motion.a
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        href="#roadmap"
+                        className="px-8 py-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl font-bold text-lg hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-3"
+                    >
+                        <Globe size={20} />
+                        Explore Roadmap
+                    </motion.a>
+                </motion.div>
+
+
+
             </div>
         </section>
     );
 };
 
 const PythonSpeedRun = () => {
-    const [gameState, setGameState] = useState('start'); // start, inputName, playing, finished
+    const [gameState, setGameState] = useState('start');
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [feedback, setFeedback] = useState(null); // correct, wrong
+    const [feedback, setFeedback] = useState(null);
     const [gameQuestions, setGameQuestions] = useState([]);
     const [playerName, setPlayerName] = useState('');
     const [leaderboard, setLeaderboard] = useState([]);
     const [userAnswers, setUserAnswers] = useState([]);
-    const [streak, setStreak] = useState(0); // New: Combo Streak
-    const [allQuestions, setAllQuestions] = useState([]); // New
-    const [loadingQuestions, setLoadingQuestions] = useState(true); // New
+    const [streak, setStreak] = useState(0);
+    const [allQuestions, setAllQuestions] = useState([]);
+    const [loadingQuestions, setLoadingQuestions] = useState(true);
 
-    // --- FETCH QUESTIONS ---
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
@@ -255,11 +297,6 @@ const PythonSpeedRun = () => {
             }
         };
 
-        fetchQuestions();
-    }, []);
-
-    useEffect(() => {
-        // Load leaderboard from Supabase
         const fetchLeaderboard = async () => {
             const { data, error } = await supabase
                 .from('leaderboard')
@@ -267,22 +304,16 @@ const PythonSpeedRun = () => {
                 .order('score', { ascending: false })
                 .limit(5);
 
-            if (data) {
-                setLeaderboard(data);
-            } else if (error) {
-                console.error("Error fetching leaderboard:", error);
-            }
+            if (data) setLeaderboard(data);
         };
 
+        fetchQuestions();
         fetchLeaderboard();
     }, []);
+
     const saveScore = async () => {
         const name = playerName || 'Anonymous';
-        console.log("Submitting score for:", name);
-
         try {
-            // Security Update:
-            // We send a signature to verify the request integrity.
             const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
             const payload = name + JSON.stringify(userAnswers) + SECRET_SALT;
             const signature = CryptoJS.MD5(payload).toString();
@@ -299,18 +330,8 @@ const PythonSpeedRun = () => {
                 }),
             });
 
-            console.log("Response status:", response.status);
-
-            if (!response.ok) {
-                const text = await response.text();
-                console.error("Server Error:", text);
-                throw new Error(`Server Error (${response.status}): ${text.slice(0, 50)}...`);
-            }
-
+            if (!response.ok) throw new Error('Server Error');
             const result = await response.json();
-            console.log("Score submitted successfully:", result);
-
-            // Update local score with server-validated score
             setScore(result.score);
 
             // Refresh leaderboard
@@ -323,35 +344,21 @@ const PythonSpeedRun = () => {
 
         } catch (error) {
             console.error("Error saving score:", error);
-            let msg = error.message;
-            if (msg.includes("Unexpected end of JSON input") || msg.includes("Server Error (404)")) {
-                msg = "API tidak jalan di localhost biasa. Gunakan 'vercel dev' atau deploy ke Vercel.";
-            }
-            alert(`Gagal menyimpan skor: ${msg}`);
         }
     };
 
-    // Function to shuffle array
-    const shuffleQuestions = () => {
-        return [...allQuestions].sort(() => 0.5 - Math.random());
-    };
-
-    const handleStartClick = () => {
-        setGameState('inputName');
-    };
+    const shuffleQuestions = () => [...allQuestions].sort(() => 0.5 - Math.random());
 
     const startGame = () => {
         if (loadingQuestions || allQuestions.length === 0) {
             alert("Sedang memuat soal, harap tunggu...");
             return;
         }
-
         if (!playerName.trim()) {
             alert("Masukkan nama kamu dulu ya!");
             return;
         }
-        const selectedQuestions = shuffleQuestions();
-        setGameQuestions(selectedQuestions);
+        setGameQuestions(shuffleQuestions());
         setGameState('playing');
         setScore(0);
         setTimeLeft(60);
@@ -372,105 +379,101 @@ const PythonSpeedRun = () => {
     }, [gameState, timeLeft]);
 
     const handleAnswer = (index) => {
-        // Record answer
         const currentQuestion = gameQuestions[currentQuestionIndex];
         setUserAnswers(prev => [...prev, {
             questionId: currentQuestion.id,
             selectedAnswerIndex: index
         }]);
 
-        // Security Update: Verify using Hash
+        // Verify locally for immediate feedback (server validates again later)
         const SECRET_SALT = 'SADACOM_SECRET_SALT_2024';
         const payload = `${currentQuestion.id}-${index}-${SECRET_SALT}`;
         const checkHash = CryptoJS.MD5(payload).toString();
 
         if (checkHash === currentQuestion.answerHash) {
-            // Calculate Points
             let points = 10;
             if (currentQuestion.difficulty === 'Medium') points = 13;
             if (currentQuestion.difficulty === 'Hard') points = 16;
-
-            // Combo Bonus: +2 for every streak beyond 1
             const currentStreak = streak + 1;
             const comboBonus = (currentStreak - 1) * 2;
-            const totalPoints = points + comboBonus;
-
-            setScore((prev) => prev + totalPoints);
+            setScore((prev) => prev + points + comboBonus);
             setStreak(currentStreak);
             setFeedback('correct');
         } else {
-            setStreak(0); // Reset Streak
+            setStreak(0);
             setFeedback('wrong');
         }
 
         setTimeout(() => {
             setFeedback(null);
-            // Endless Mode Logic
             if (currentQuestionIndex < gameQuestions.length - 1) {
                 setCurrentQuestionIndex((prev) => prev + 1);
             } else {
-                // Reshuffle and restart index to loop questions
                 setGameQuestions(shuffleQuestions());
                 setCurrentQuestionIndex(0);
             }
-        }, 500);
-    };
-
-    const resetGame = () => {
-        setGameState('start');
-        setScore(0);
-        setTimeLeft(60);
-        setCurrentQuestionIndex(0);
-        setGameQuestions([]);
-        setPlayerName('');
-        setUserAnswers([]);
-        setStreak(0);
+        }, 300);
     };
 
     return (
-        <section id="game" className="py-20 bg-slate-50 dark:bg-slate-900 transition-colors">
+        <section id="game" className="py-24 bg-slate-50 dark:bg-slate-900 transition-colors border-t border-slate-200 dark:border-slate-800">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Python Speed Run 🐍</h2>
-                    <p className="text-slate-600 dark:text-slate-400">Uji kemampuan dasar Python-mu dalam 60 detik!</p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold mb-4 uppercase tracking-widest border border-green-200 dark:border-green-800">
+                        <Terminal size={12} /> Challenge
+                    </div>
+                    <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Python Speed Run 🐍</h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-lg">Uji kemampuan dasar Python-mu dalam 60 detik!</p>
                 </div>
 
-                <div className="bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-slate-700 font-mono relative">
-                    {/* Terminal Header */}
-                    <div className="bg-slate-800 px-4 py-2 flex items-center gap-2 border-b border-slate-700">
-                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span className="ml-2 text-xs text-slate-400">user@sadacom:~/python-quiz</span>
+                <div className="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800 font-mono relative ring-4 ring-slate-200 dark:ring-slate-800 ring-opacity-50">
+                    {/* Header */}
+                    <div className="bg-slate-950 px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                        <div className="flex gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <span className="text-xs text-slate-500 font-medium">user@sadacom:~/python-quiz</span>
+                        <div className="w-4"></div>
                     </div>
 
-                    {/* Terminal Body */}
-                    <div className="p-8 min-h-[400px] flex flex-col items-center justify-center text-green-400">
+                    <div className="p-8 min-h-[450px] flex flex-col items-center justify-center text-slate-300 relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950">
+                        {/* CSS-based Grid Background for Terminal */}
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20 pointer-events-none"></div>
+
                         {gameState === 'start' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center w-full">
-                                <Terminal size={64} className="mx-auto mb-6 text-blue-500" />
-                                <h3 className="text-2xl font-bold mb-6 text-white">Siap menjadi Python Master?</h3>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center w-full relative z-10">
+                                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5, delay: 1 }} >
+                                    <Code2 size={48} className="mx-auto mb-6 text-green-400" />
+                                </motion.div>
+                                <h3 className="text-2xl font-bold mb-8 text-white">Siap menjadi Python Master?</h3>
 
-                                <div className="flex justify-center mb-8">
-                                    <button
-                                        onClick={handleStartClick}
-                                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition-all flex items-center gap-2"
-                                    >
-                                        <Play size={20} /> Mulai Game
-                                    </button>
-                                </div>
+                                {gameState === 'start' && !playerName ? (
+                                    <div className="flex flex-col gap-4 max-w-xs mx-auto">
+                                        <button
+                                            onClick={() => setGameState('inputName')}
+                                            className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-xl font-bold transition-all w-full flex items-center justify-center gap-2 shadow-lg shadow-green-900/20"
+                                        >
+                                            <Play size={18} /> Mulai Game
+                                        </button>
+                                    </div>
+                                ) : null}
 
-                                {/* Leaderboard Preview */}
+
                                 {leaderboard.length > 0 && (
-                                    <div className="max-w-md mx-auto bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                                        <h4 className="text-yellow-400 font-bold mb-3 flex items-center justify-center gap-2">
-                                            <Award size={16} /> Top 5 Leaderboard
+                                    <div className="mt-12 max-w-sm mx-auto bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                                        <h4 className="text-yellow-400 text-sm font-bold mb-4 uppercase tracking-widest flex items-center justify-center gap-2">
+                                            <Award size={14} /> Leaderboard Top 5
                                         </h4>
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             {leaderboard.map((entry, idx) => (
-                                                <div key={idx} className="flex justify-between text-sm text-slate-300 border-b border-slate-700/50 pb-1 last:border-0">
-                                                    <span>{idx + 1}. {entry.name}</span>
-                                                    <span className="font-mono text-green-400">{entry.score} pts</span>
+                                                <div key={idx} className="flex justify-between text-sm items-center">
+                                                    <span className="flex items-center gap-3">
+                                                        <span className={`font-mono font-bold ${idx === 0 ? 'text-yellow-400' : 'text-slate-500'}`}>#{idx + 1}</span>
+                                                        <span className="text-slate-300 font-medium">{entry.name}</span>
+                                                    </span>
+                                                    <span className="font-mono text-green-400">{entry.score}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -480,67 +483,79 @@ const PythonSpeedRun = () => {
                         )}
 
                         {gameState === 'inputName' && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center w-full max-w-md">
-                                <h3 className="text-xl font-bold mb-6 text-white">Masukkan Nama Kamu</h3>
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm text-center relative z-10">
+                                <h3 className="text-xl font-bold mb-6 text-white">Masukkan Username</h3>
                                 <input
                                     type="text"
                                     value={playerName}
                                     onChange={(e) => setPlayerName(e.target.value)}
-                                    placeholder="Nama / Nickname"
-                                    className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white mb-6 focus:outline-none focus:border-blue-500 text-center text-lg"
+                                    placeholder="Nama atau Nickname"
+                                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white mb-4 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all text-center placeholder:text-slate-600"
                                     onKeyDown={(e) => e.key === 'Enter' && startGame()}
                                     autoFocus
                                 />
                                 <button
                                     onClick={startGame}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition-all w-full"
+                                    className="bg-white text-slate-900 hover:bg-slate-200 px-8 py-3 rounded-xl font-bold transition-all w-full"
                                 >
-                                    Mulai!
+                                    Start Game
+                                </button>
+                                <button
+                                    onClick={() => setGameState('start')}
+                                    className="mt-4 text-slate-500 hover:text-white text-sm"
+                                >
+                                    Kembali
                                 </button>
                             </motion.div>
                         )}
 
                         {gameState === 'playing' && gameQuestions.length > 0 && (
-                            <div className="w-full max-w-lg">
-                                <div className="flex justify-between mb-8 text-lg font-bold border-b border-slate-700 pb-4">
-                                    <span className="text-blue-400">Score: {score}</span>
+                            <div className="w-full max-w-xl relative z-10">
+                                <div className="flex justify-between mb-8 pb-4 border-b border-slate-800">
+                                    <div className="flex flex-col">
+                                        <span className="text-slate-500 text-xs uppercase tracking-wider">Score</span>
+                                        <span className="text-2xl font-bold text-white font-mono">{score}</span>
+                                    </div>
+
                                     {streak > 1 && (
-                                        <span className="text-orange-400 animate-pulse font-bold">
-                                            COMBO x{streak}! (+{(streak - 1) * 2})
-                                        </span>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-orange-500 text-sm font-bold animate-pulse">COMBO X{streak}</span>
+                                            <span className="text-orange-500/60 text-xs">+{(streak - 1) * 2} BONUS</span>
+                                        </div>
                                     )}
-                                    <span className={`${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-yellow-400'}`}>
-                                        Time: {timeLeft}s
-                                    </span>
+
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-slate-500 text-xs uppercase tracking-wider">Time</span>
+                                        <span className={`text-2xl font-bold font-mono ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>{timeLeft}s</span>
+                                    </div>
                                 </div>
 
-                                <div className="mb-8">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="text-slate-400 text-sm">Question {score / 10 + 1}</span>
-                                        <span className={`text-xs px-2 py-1 rounded ${gameQuestions[currentQuestionIndex].difficulty === 'Easy' ? 'bg-green-900 text-green-300' :
-                                            gameQuestions[currentQuestionIndex].difficulty === 'Medium' ? 'bg-yellow-900 text-yellow-300' :
-                                                'bg-red-900 text-red-300'
-                                            }`}>
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className={`text-[10px] px-2 py-0.5 rounded border ${gameQuestions[currentQuestionIndex].difficulty === 'Easy' ? 'bg-green-500/10 border-green-500/30 text-green-400' :
+                                            gameQuestions[currentQuestionIndex].difficulty === 'Medium' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
+                                                'bg-red-500/10 border-red-500/30 text-red-400'
+                                            } uppercase tracking-wider font-bold`}>
                                             {gameQuestions[currentQuestionIndex].difficulty}
                                         </span>
                                     </div>
-                                    <p className="text-xl text-white mb-6">
-                                        <span className="text-blue-500">{'>>>'}</span> {gameQuestions[currentQuestionIndex].question}
+                                    <p className="text-lg md:text-xl text-slate-200 mb-8 font-medium leading-relaxed">
+                                        {gameQuestions[currentQuestionIndex].question}
                                     </p>
-                                    <div className="grid gap-4">
+                                    <div className="grid grid-cols-1 gap-3">
                                         {gameQuestions[currentQuestionIndex].options.map((opt, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => handleAnswer(idx)}
-                                                className={`w-full text-left px-4 py-3 rounded border transition-all ${feedback
+                                                className={`w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 font-mono text-sm ${feedback
                                                     ? CryptoJS.MD5(`${gameQuestions[currentQuestionIndex].id}-${idx}-SADACOM_SECRET_SALT_2024`).toString() === gameQuestions[currentQuestionIndex].answerHash
-                                                        ? 'bg-green-900/50 border-green-500 text-green-200'
-                                                        : 'bg-red-900/50 border-red-500 text-red-200'
-                                                    : 'bg-slate-800 border-slate-700 hover:bg-slate-700 hover:border-blue-500 text-slate-300'
+                                                        ? 'bg-green-500/20 border-green-500/50 text-green-200'
+                                                        : 'bg-red-500/10 border-red-500/30 text-red-300 opacity-50'
+                                                    : 'bg-slate-800/50 border-slate-700 hover:bg-slate-800 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] text-slate-300'
                                                     }`}
                                                 disabled={feedback !== null}
                                             >
-                                                {opt}
+                                                <span className="text-slate-500 mr-2">{String.fromCharCode(65 + idx)}.</span> {opt}
                                             </button>
                                         ))}
                                     </div>
@@ -549,53 +564,41 @@ const PythonSpeedRun = () => {
                         )}
 
                         {gameState === 'finished' && (
-                            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-center w-full">
-                                <Award size={64} className="mx-auto mb-6 text-yellow-500" />
-                                <h3 className="text-3xl font-bold mb-2 text-white">Game Over!</h3>
-                                <p className="text-xl text-slate-300 mb-8">
-                                    Hebat {playerName}! Skor Akhir: <span className="text-green-400 font-bold">{score}</span>
+                            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center w-full max-w-md relative z-10">
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, ease: "backOut" }}
+                                    className="w-20 h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-yellow-500"
+                                >
+                                    <Award size={40} />
+                                </motion.div>
+                                <h3 className="text-3xl font-bold mb-2 text-white">Time's Up!</h3>
+                                <p className="text-slate-400 mb-8">
+                                    Nice try, <span className="text-white font-bold">{playerName}</span>!
                                 </p>
 
-                                {/* Leaderboard Table */}
-                                <div className="max-w-md mx-auto bg-slate-800/50 rounded-lg p-6 border border-slate-700 mb-8">
-                                    <h4 className="text-yellow-400 font-bold mb-4 flex items-center justify-center gap-2">
-                                        <Award size={20} /> Leaderboard
-                                    </h4>
-                                    <div className="space-y-3">
-                                        {leaderboard.map((entry, idx) => (
-                                            <div
-                                                key={idx}
-                                                className={`flex justify-between items-center p-2 rounded ${entry.name === playerName && entry.score === score ? 'bg-blue-900/30 border border-blue-500/30' : ''}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${idx === 0 ? 'bg-yellow-500 text-black' :
-                                                        idx === 1 ? 'bg-slate-400 text-black' :
-                                                            idx === 2 ? 'bg-orange-700 text-white' : 'bg-slate-700 text-slate-300'
-                                                        }`}>
-                                                        {idx + 1}
-                                                    </span>
-                                                    <span className="text-slate-200 font-medium">{entry.name}</span>
-                                                </div>
-                                                <span className="font-mono text-green-400 font-bold">{entry.score}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 mx-auto mb-8">
+                                    <span className="text-slate-500 text-xs uppercase tracking-wider">Final Score</span>
+                                    <div className="text-5xl font-bold text-green-400 font-mono mt-2">{score}</div>
                                 </div>
 
-                                <div className="flex gap-4 justify-center">
+                                <div className="flex gap-3 justify-center">
                                     <button
-                                        onClick={resetGame}
-                                        className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2"
+                                        onClick={() => {
+                                            setGameState('start');
+                                            setPlayerName('');
+                                        }}
+                                        className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2"
                                     >
-                                        <RotateCcw size={20} /> Main Lagi
+                                        <RotateCcw size={18} /> Main Lagi
                                     </button>
                                     <a
                                         href={config.registrationLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all"
+                                        className="bg-white text-slate-900 hover:bg-slate-200 px-6 py-3 rounded-xl font-bold transition-all"
                                     >
-                                        Daftar Komunitas
+                                        Share / Daftar
                                     </a>
                                 </div>
                             </motion.div>
@@ -616,18 +619,18 @@ const Roadmap = () => {
     ];
 
     return (
-        <section id="roadmap" className="py-20 overflow-hidden">
+        <section id="roadmap" className="py-24 bg-white dark:bg-slate-950 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">Roadmap Menuju Gen AI</h2>
-                    <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        Kurikulum yang disusun sistematis untuk membawamu dari nol hingga mahir.
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Roadmap Menuju Gen AI</h2>
+                    <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg">
+                        Langkah sistematis dari pemula hingga mahir.
                     </p>
                 </div>
 
                 <div className="relative">
-                    {/* Connecting Line (Desktop) */}
-                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800 -translate-y-1/2 z-0"></div>
+                    {/* Line - Hidden on Mobile */}
+                    <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-slate-100 dark:bg-slate-800 z-0"></div>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
                         {steps.map((step, index) => (
@@ -636,14 +639,15 @@ const Roadmap = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: index * 0.2 }}
-                                className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 text-center group hover:-translate-y-2 transition-transform duration-300"
+                                transition={{ delay: index * 0.1 }}
+                                whileHover={{ y: -10 }}
+                                className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 text-center group hover:border-blue-200 dark:hover:border-blue-900/50 hover:shadow-2xl transition-all duration-300"
                             >
-                                <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4 group-hover:scale-110 transition-transform">
-                                    {React.cloneElement(step.icon, { size: 32 })}
+                                <div className="w-14 h-14 mx-auto bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-900 dark:text-white mb-6 shadow-sm z-10 relative border border-slate-100 dark:border-slate-700 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300">
+                                    {React.cloneElement(step.icon, { size: 24, strokeWidth: 1.5 })}
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{step.title}</h3>
-                                <p className="text-slate-600 dark:text-slate-400 text-sm">{step.desc}</p>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{step.title}</h3>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{step.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -655,44 +659,64 @@ const Roadmap = () => {
 
 const CertificateShowcase = () => {
     return (
-        <section className="py-20 bg-slate-900 text-white overflow-hidden relative">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="lg:flex items-center justify-between gap-16">
+        <section className="py-24 overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors border-y border-slate-100 dark:border-slate-800">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="lg:flex items-center justify-between gap-20">
                     <div className="lg:w-1/2 mb-12 lg:mb-0">
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-                            Dapatkan Sertifikat & <br />
-                            <span className="text-blue-400">Token Kelas Gratis</span>
+                        <div className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold mb-6 uppercase tracking-wider">
+                            Official Certification
+                        </div>
+                        <h2 className="text-4xl font-bold mb-6 text-slate-900 dark:text-white tracking-tight leading-tight">
+                            Bukti Keahlianmu, <br />
+                            Diakui Industri.
                         </h2>
-                        <p className="text-slate-300 text-lg mb-8 leading-relaxed">
-                            Bangun portofolio profesionalmu dengan sertifikat resmi dari SaDaCom dan Dicoding.
-                            Selesaikan tantangan dan dapatkan akses premium ke materi pembelajaran berstandar industri.
+                        <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 leading-relaxed">
+                            Dapatkan sertifikat resmi dari Dicoding setelah menyelesaikan kelas. Validasi skill kamu dan bangun portofolio yang kuat.
                         </p>
-                        <ul className="space-y-4 mb-8">
+                        <div className="space-y-4">
                             {[
-                                "Sertifikat Kelulusan Resmi",
-                                "Token Kelas Dicoding Academy",
-                                "Badge Digital untuk LinkedIn"
+                                "Sertifikat Kelulusan Resmi Dicoding",
+                                "Akses Token Kelas Premium Gratis",
+                                "Badge Digital & Portofolio Review"
                             ].map((item, i) => (
-                                <li key={i} className="flex items-center gap-3">
-                                    <CheckCircle2 className="text-green-400" size={24} />
-                                    <span className="text-slate-200">{item}</span>
-                                </li>
+                                <motion.div
+                                    key={i}
+                                    initial={{ x: -20, opacity: 0 }}
+                                    whileInView={{ x: 0, opacity: 1 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="flex items-center gap-4 group"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-500 group-hover:scale-110 transition-transform">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{item}</span>
+                                </motion.div>
                             ))}
-                        </ul>
+                        </div>
+                        <div className="mt-10">
+                            <a
+                                href={config.registrationLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                            >
+                                Lihat Contoh Sertifikat <ChevronRight size={16} />
+                            </a>
+                        </div>
                     </div>
 
-                    <div className="lg:w-1/2 flex justify-center perspective-1000">
+                    <div className="lg:w-1/2 relative perspective-1000">
+                        {/* Card Reflection/Shadow */}
+                        <div className="absolute top-10 left-10 w-full h-full bg-slate-200 dark:bg-slate-800 rounded-2xl transform rotate-3"></div>
+
                         <motion.div
-                            whileHover={{ rotateY: 10, rotateX: -5, scale: 1.05 }}
-                            className="relative group cursor-pointer"
-                            style={{ transformStyle: 'preserve-3d' }}
+                            whileHover={{ scale: 1.05, rotateY: 5 }}
+                            className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 transition-transform duration-500"
                         >
-                            <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
                             <img
                                 src={assets.certificateImage}
                                 alt="Contoh Sertifikat"
-                                className="relative rounded-xl shadow-2xl border-4 border-slate-700 w-full max-w-md mx-auto"
+                                className="w-full h-auto"
                             />
                         </motion.div>
                     </div>
@@ -704,29 +728,33 @@ const CertificateShowcase = () => {
 
 const Benefits = () => {
     const benefits = [
-        { title: "Kurikulum Industri", desc: "Materi relevan dengan kebutuhan pasar kerja saat ini.", icon: <Code2 /> },
-        { title: "Networking Luas", desc: "Terhubung dengan praktisi dan sesama learner.", icon: <Users /> },
-        { title: "Study Group", desc: "Belajar bareng mentor yang siap membantu.", icon: <Users /> },
-        { title: "Token Gratis", desc: "Akses kelas berbayar tanpa biaya sepeserpun.", icon: <Award /> },
+        { title: "Kurikulum Industri", desc: "Materi yang relevan dan up-to-date.", icon: <Code2 /> },
+        { title: "Networking Luas", desc: "Koneksi dengan praktisi & expert.", icon: <Users /> },
+        { title: "Mentorship", desc: "Bimbingan langsung dari mentor.", icon: <Users /> },
+        { title: "Gratis Selamanya", desc: "Akses ilmu mahal tanpa biaya.", icon: <Award /> },
     ];
 
     return (
-        <section id="benefit" className="py-20 bg-white dark:bg-slate-950 transition-colors">
+        <section id="benefit" className="py-24 bg-white dark:bg-slate-950 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Benefit Bergabung</h2>
-                    <p className="text-slate-600 dark:text-slate-400">Lebih dari sekadar komunitas, ini adalah akselerator kariermu.</p>
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Why SaDaCom?</h2>
+                    <p className="text-slate-600 dark:text-slate-400">Benefit nyata untuk akselerasi kariermu.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {benefits.map((item, index) => (
-                        <div key={index} className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors border border-slate-100 dark:border-slate-800">
-                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
-                                {React.cloneElement(item.icon, { size: 24 })}
+                        <motion.div
+                            key={index}
+                            whileHover={{ y: -5 }}
+                            className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-blue-100 dark:hover:border-blue-900 hover:shadow-xl transition-all duration-300 group"
+                        >
+                            <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-900 dark:text-white mb-6 border border-slate-100 dark:border-slate-700 shadow-sm group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                {React.cloneElement(item.icon, { size: 24, strokeWidth: 1.5 })}
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                            <p className="text-slate-600 dark:text-slate-400 text-sm">{item.desc}</p>
-                        </div>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                        </motion.div>
                     ))}
                 </div>
             </div>
@@ -736,19 +764,28 @@ const Benefits = () => {
 
 const Footer = () => {
     return (
-        <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 transition-colors">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="flex items-center gap-2">
-                    <img src={assets.logo} alt="SaDaCom Logo" className="w-8 h-8 rounded-lg object-cover" />
-                    <span className="font-bold text-xl text-slate-900 dark:text-white">SaDaCom</span>
-                </div>
+        <footer className="bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 py-16 transition-colors">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="flex flex-col items-center md:items-start gap-4">
+                        <div className="flex items-center gap-3">
+                            <img src={assets.logo} alt="SaDaCom Logo" className="w-10 h-10 rounded-xl object-cover shadow-sm bg-slate-50" />
+                            <span className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">SaDaCom</span>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs text-center md:text-left leading-relaxed">
+                            Membangun talenta digital masa depan Indonesia melalui komunitas yang inklusif.
+                        </p>
+                    </div>
 
-                <div className="text-slate-500 dark:text-slate-400 text-sm text-center md:text-right">
-                    <p>&copy; {new Date().getFullYear()} Sains Data Community. All rights reserved.</p>
-                    <div className="flex gap-4 justify-center md:justify-end mt-4">
-                        <a href="https://www.instagram.com/sadacommunity?igsh=MThyZXpvZXB6Ym9mNw==" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">Instagram</a>
-                        <a href="#" className="hover:text-blue-600 transition-colors">LinkedIn</a>
-                        <a href="#" className="hover:text-blue-600 transition-colors">Discord</a>
+                    <div className="flex flex-col items-center md:items-end gap-4">
+                        <div className="flex gap-6">
+                            <a href="https://www.instagram.com/sadacommunity?igsh=MThyZXpvZXB6Ym9mNw==" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-medium">Instagram</a>
+                            <a href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-medium">LinkedIn</a>
+                            <a href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-medium">Discord</a>
+                        </div>
+                        <p className="text-slate-400 dark:text-slate-600 text-xs text-center md:text-right">
+                            &copy; {new Date().getFullYear()} Sains Data Community. <br className="hidden md:block" /> All rights reserved.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -768,11 +805,11 @@ function App() {
     }, [darkMode]);
 
     return (
-        <div className={`min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 ${darkMode ? 'dark' : ''}`}>
+        <div className={`min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100 ${darkMode ? 'dark' : ''} font-sans`}>
             <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
             <main>
                 <Hero />
-                <NewsSection />
+                <EventSection />
                 <StatsSection />
                 <Roadmap />
                 <PythonSpeedRun />

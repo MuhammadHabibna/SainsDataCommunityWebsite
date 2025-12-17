@@ -1,51 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    Cell
+} from 'recharts';
 import { Users, TrendingUp, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const StatsSection = () => {
-    const [totalMembers, setTotalMembers] = useState(0);
-    const [batchData, setBatchData] = useState([]);
+    const [stats, setStats] = useState({ totalMembers: 0, batchDistribution: [] });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                setLoading(true);
-                // Fetch all members to calculate stats
-                // Note: For very large datasets, we should use RPC or separate count queries,
-                // but for a community list this is fine for now.
-                const { data, error } = await supabase
+                // Fetch total members
+                const { count, error: countError } = await supabase
+                    .from('members')
+                    .select('*', { count: 'exact', head: true });
+
+                if (countError) throw countError;
+
+                // Fetch batch distribution
+                const { data: batchData, error: batchError } = await supabase
                     .from('members')
                     .select('batch');
 
-                if (error) throw error;
+                if (batchError) throw batchError;
 
-                // 1. Calculate Total Members
-                setTotalMembers(data.length);
-
-                // 2. Process Batch Data
-                const batchCounts = data.reduce((acc, curr) => {
+                // Process batch data
+                const distribution = batchData.reduce((acc, curr) => {
                     const batch = curr.batch || 'Unknown';
                     acc[batch] = (acc[batch] || 0) + 1;
                     return acc;
                 }, {});
 
-                // Convert to array for Recharts and sort by batch name
-                const chartData = Object.keys(batchCounts)
-                    .map(key => ({
-                        name: key,
-                        count: batchCounts[key]
-                    }))
-                    .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically/numerically
+                const chartData = Object.entries(distribution)
+                    .map(([name, value]) => ({ name: `Batch ${name}`, value }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
 
-                setBatchData(chartData);
-
-            } catch (err) {
-                console.error("Error fetching stats:", err);
-                setError("Gagal memuat data statistik.");
+                setStats({
+                    totalMembers: count,
+                    batchDistribution: chartData
+                });
+            } catch (error) {
+                console.error('Error fetching stats:', error);
             } finally {
                 setLoading(false);
             }
@@ -54,107 +58,115 @@ const StatsSection = () => {
         fetchStats();
     }, []);
 
-    // Custom Tooltip for Recharts
-    const CustomTooltip = ({ active, payload, label }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-white dark:bg-slate-800 p-3 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg">
-                    <p className="font-bold text-slate-900 dark:text-white">{label}</p>
-                    <p className="text-blue-600 dark:text-blue-400">
-                        {payload[0].value} Member
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
+    const COLORS = ['#3b82f6', '#06b6d4', '#8b5cf6', '#ec4899'];
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-20 bg-slate-50 dark:bg-slate-950">
+                <Loader2 className="animate-spin text-blue-500" size={32} />
+            </div>
+        );
+    }
 
     return (
-        <section className="py-12 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 transition-colors">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-10">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-center gap-3">
-                        <TrendingUp className="text-blue-600" /> Live Community Stats
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Pantau pertumbuhan komunitas SaDaCom secara real-time.
+        <section className="py-24 bg-slate-50 dark:bg-slate-900 transition-colors relative overflow-hidden">
+
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-[100px] pointer-events-none"></div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="text-center mb-16">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold mb-4 uppercase tracking-wider border border-blue-200 dark:border-blue-800"
+                    >
+                        <TrendingUp size={14} /> Growth
+                    </motion.div>
+                    <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Community Stats</h2>
+                    <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg">
+                        Pertumbuhan komunitas kami secara real-time.
                     </p>
                 </div>
 
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader2 className="animate-spin text-blue-600" size={48} />
-                    </div>
-                ) : error ? (
-                    <div className="text-center text-red-500 bg-red-100 dark:bg-red-900/20 p-4 rounded-lg">
-                        {error}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Total Members Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center lg:col-span-1"
-                        >
-                            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
-                                <Users size={40} />
-                            </div>
-                            <h3 className="text-lg font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                                Total Member
-                            </h3>
-                            <div className="text-6xl font-extrabold text-slate-900 dark:text-white">
-                                {totalMembers}
-                            </div>
-                            <p className="text-sm text-slate-400 mt-4">
-                                Data terupdate secara real-time
-                            </p>
-                        </motion.div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    {/* Total Members Card */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                        whileHover={{ y: -5 }}
+                        className="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-xl shadow-blue-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700 relative overflow-hidden group"
+                    >
+                        {/* Card Reflection */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full transform translate-x-12 -translate-y-12 transition-transform duration-500 group-hover:translate-x-0 group-hover:translate-y-0"></div>
 
-                        {/* Batch Distribution Chart */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 lg:col-span-2 min-h-[400px]"
-                        >
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 pl-4 border-l-4 border-blue-500">
-                                Sebaran Member per Angkatan
-                            </h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart
-                                        data={batchData}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} vertical={false} />
-                                        <XAxis
-                                            dataKey="name"
-                                            stroke="#64748b"
-                                            tick={{ fill: '#64748b' }}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-                                        <YAxis
-                                            stroke="#64748b"
-                                            tick={{ fill: '#64748b' }}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                                        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                                            {batchData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#06b6d4'} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
+                        <div className="flex items-center gap-6 mb-6 relative z-10">
+                            <div className="p-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl text-white shadow-lg shadow-blue-500/30">
+                                <Users size={32} />
                             </div>
-                        </motion.div>
-                    </div>
-                )}
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Total Members</h3>
+                                <div className="text-6xl sm:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 font-mono tracking-tighter">
+                                    {stats.totalMembers}
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+                            Mahasiswa aktif yang telah bergabung dan belajar bersama di Sains Data Community.
+                        </p>
+                    </motion.div>
+
+                    {/* Chart Card */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-xl shadow-blue-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700 h-[400px] flex flex-col relative overflow-hidden"
+                    >
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                            <span className="w-2 h-6 bg-cyan-500 rounded-full"></span>
+                            Distribusi Batch
+                        </h3>
+                        <div className="flex-grow w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={stats.batchDistribution}>
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="#94a3b8"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        stroke="#94a3b8"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dx={-10}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                                        contentStyle={{
+                                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                            color: '#fff',
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Bar dataKey="value" radius={[6, 6, 0, 0]} animationDuration={1500}>
+                                        {stats.batchDistribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </motion.div>
+                </div>
             </div>
         </section>
     );
