@@ -511,7 +511,7 @@ const EventSection = () => {
     return (
         <section id="announcement" className="py-24 bg-white dark:bg-slate-950 text-slate-900 dark:text-white relative transition-colors overflow-hidden">
             {/* Background elements - Modern Vector Art */}
-            <div className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20">
+            <div className="absolute inset-0 pointer-events-none opacity-65 dark:opacity-45">
                 <svg className="w-full h-full" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                     <path d="M0 600L48 586.7C96 573 192 547 288 548.3C384 550 480 580 576 600C672 620 768 630 864 613.3C960 597 1056 553 1152 536.7C1248 520 1344 530 1392 535L1440 540V800H1392C1344 800 1248 800 1152 800C1056 800 960 800 864 800C768 800 672 800 576 800C480 800 384 800 288 800C192 800 96 800 48 800H0V600Z" fill="url(#paint0_linear)" />
                     <path d="M0 400L48 418.3C96 437 192 473 288 471.7C384 470 480 430 576 410C672 390 768 390 864 406.7C960 423 1056 457 1152 463.3C1248 470 1344 450 1392 440L1440 430V800H1392C1344 800 1248 800 1152 800C1056 800 960 800 864 800C768 800 672 800 576 800C480 800 384 800 288 800C192 800 96 800 48 800H0V400Z" fill="url(#paint1_linear)" style={{ mixBlendMode: 'multiply' }} />
