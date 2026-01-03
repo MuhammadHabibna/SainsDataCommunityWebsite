@@ -510,8 +510,12 @@ const EventSection = () => {
 
     return (
         <section id="announcement" className="py-24 bg-white dark:bg-slate-950 text-slate-900 dark:text-white relative transition-colors overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-cyan-500/5 rounded-[100%] blur-3xl pointer-events-none"></div>
+            {/* Background elements - Modern Minimalist Grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808025_1px,transparent_1px),linear-gradient(to_bottom,#80808025_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+            {/* Subtle flow lines / abstract art */}
+            <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-[800px] h-[600px] bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
 
             <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10">
                 <motion.div

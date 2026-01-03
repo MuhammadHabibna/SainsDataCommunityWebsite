@@ -240,14 +240,12 @@ const Hero = () => {
                     <motion.a
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
-                        href={config.registrationLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#announcement"
                         className="group relative px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-lg shadow-xl shadow-slate-900/20 dark:shadow-white/10 overflow-hidden flex items-center gap-3 transition-all"
                     >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                         <Sparkles size={20} className="text-yellow-400" />
-                        Gabung Sekarang
+                        Cek Latest News
                         <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </motion.a>
 
