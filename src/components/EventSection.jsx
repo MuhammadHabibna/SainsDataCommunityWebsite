@@ -15,7 +15,12 @@ import {
     Database,
     Brain,
     CheckCircle,
-    Info
+    Info,
+    MonitorPlay,
+    Users,
+    Laptop,
+    Lightbulb,
+    Presentation
 } from 'lucide-react';
 
 const CountdownTimer = ({ deadline }) => {
@@ -148,6 +153,7 @@ const EventModal = ({ item, children, onClose, title }) => {
                                 <div className="prose prose-sm md:prose-base prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 mb-8 whitespace-pre-wrap leading-relaxed">
                                     {item.content}
                                 </div>
+                                {/** Moved countdown FROM detail ONLY to ALSO details if desired, but request was for "card". Keeping it here too is fine. */}
                                 {item.registration_deadline && (
                                     <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800 flex justify-center">
                                         <CountdownTimer deadline={item.registration_deadline} />
@@ -175,6 +181,7 @@ const EventModal = ({ item, children, onClose, title }) => {
 };
 
 const LearningPaths = () => {
+    // ... kept same logic ...
     const paths = [
         {
             id: 'ai',
@@ -287,9 +294,43 @@ const LearningPaths = () => {
     );
 };
 
+// NEW: Benefits Component for Card Display
+const MetcBenefits = () => {
+    const benefits = [
+        { title: 'Self Learning', icon: <MonitorPlay size={18} />, desc: 'Akses pelatihan 100% gratis.' },
+        { title: 'Offline Workshop', icon: <Users size={18} />, desc: 'Sesi tatap muka dengan ahli.' },
+        { title: 'Online Training', icon: <Laptop size={18} />, desc: 'Bimbingan instruktur berpengalaman.' },
+        { title: 'Hackathon', icon: <Code2 size={18} />, desc: 'Asah skill & menangkan hadiah.' },
+        { title: 'Innovation Expo', icon: <Lightbulb size={18} />, desc: 'Tunjukkan karyamu ke industri.' },
+        { title: 'Exclusive Merch', icon: <Gift size={18} />, desc: 'Gadget & merchandise menarik.' },
+    ];
+
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {benefits.map((item, index) => (
+                <div key={index} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-2 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 w-fit">
+                        {item.icon}
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-xs text-slate-900 dark:text-white leading-tight">{item.title}</h4>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-1 line-clamp-2">{item.desc}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const MetcCurriculum = () => {
     return (
-        <div className="space-y-8">
+        // Added some padding wrapper or ensuring it fits in modal
+        <div className="space-y-8 w-full">
+            <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30 mb-8 text-center">
+                <h4 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">Kurikulum Program</h4>
+                <p className="text-blue-700 dark:text-blue-300">Struktur pembelajaran komprehensif dari Microsoft Elevate Training Center.</p>
+            </div>
+
             <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <h4 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white mb-4">
                     <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
@@ -392,9 +433,9 @@ const EventSection = () => {
     const [error, setError] = useState(null);
 
     // Modals
-    const [selectedEvent, setSelectedEvent] = useState(null); // For generic events
-    const [showLearningPaths, setShowLearningPaths] = useState(false); // For Coding Camp
-    const [showMetcDetails, setShowMetcDetails] = useState(false); // For METC (if we want a modal for it too, or just inline)
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [showLearningPaths, setShowLearningPaths] = useState(false);
+    const [showMetcDetails, setShowMetcDetails] = useState(false);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -418,17 +459,16 @@ const EventSection = () => {
                     item.title.toLowerCase().includes('metc')
                 );
 
-                // Fallbacks if data missing (Mocking for UI completeness based on request)
+                // Fallbacks
                 if (!cCamp && data.length > 0) cCamp = data[0];
 
-                // Construct fallback for METC if not in DB yet, so user can see the UI
                 if (!metc) {
                     metc = {
                         id: 'mock-metc',
                         title: 'Microsoft Elevate Training Center (METC)',
                         subtitle: 'Upgrade skill digitalmu bersama Microsoft.',
                         content: 'Program pelatihan intensif...',
-                        image_url: 'https://img.freepik.com/free-photo/corporate-business-handshake-business-partners_53876-102572.jpg?t=st=1735875000~exp=1735878600~hmac=mock', // Generic placeholder
+                        image_url: 'https://img.freepik.com/free-photo/corporate-business-handshake-business-partners_53876-102572.jpg?t=st=1735875000~exp=1735878600~hmac=mock',
                         category: 'Training',
                         registration_deadline: '2026-03-26',
                         cta_link: '#',
@@ -437,7 +477,6 @@ const EventSection = () => {
                     };
                 }
 
-                // Filter out featured ones from "Other Events"
                 const others = data.filter(item =>
                     item.id !== cCamp?.id &&
                     item.id !== metc?.id
@@ -543,7 +582,7 @@ const EventSection = () => {
                                             </p>
                                         )}
 
-                                        {/* Rewards Snippet */}
+                                        {/* Rewards/Benefits Snippet */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10 text-left">
                                             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl flex items-center gap-4">
                                                 <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-yellow-600 dark:text-yellow-400">
@@ -565,24 +604,32 @@ const EventSection = () => {
                                             </div>
                                         </div>
 
-                                        {/* Actions */}
-                                        <div className="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start mt-auto">
-                                            {codingCampEvent.cta_link && (
-                                                <a
-                                                    href={codingCampEvent.cta_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 px-8 rounded-xl font-bold text-center shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all"
-                                                >
-                                                    Daftar Coding Camp
-                                                </a>
+                                        {/* Actions & Timer */}
+                                        <div className="flex flex-col items-center xl:items-start gap-8 mt-auto w-full">
+                                            {codingCampEvent.registration_deadline && (
+                                                <div className="w-full max-w-md mx-auto xl:mx-0 bg-slate-50 dark:bg-slate-800/30 p-2 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <CountdownTimer deadline={codingCampEvent.registration_deadline} />
+                                                </div>
                                             )}
-                                            <button
-                                                onClick={() => setShowLearningPaths(true)}
-                                                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 py-3 px-8 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
-                                            >
-                                                <BookOpen size={18} /> Lihat Learning Path
-                                            </button>
+
+                                            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center xl:justify-start">
+                                                {codingCampEvent.cta_link && (
+                                                    <a
+                                                        href={codingCampEvent.cta_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 px-8 rounded-xl font-bold text-center shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all flex-grow sm:flex-grow-0"
+                                                    >
+                                                        Daftar Coding Camp
+                                                    </a>
+                                                )}
+                                                <button
+                                                    onClick={() => setShowLearningPaths(true)}
+                                                    className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 py-3 px-8 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex-grow sm:flex-grow-0"
+                                                >
+                                                    <BookOpen size={18} /> Lihat Learning Path
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -637,23 +684,38 @@ const EventSection = () => {
                                             {metcEvent.subtitle || 'Tingkatkan keahlianmu dengan kurikulum standar industri dari Microsoft.'}
                                         </p>
 
-                                        {/* Curriculum Snippet/Teaser */}
-                                        <div className="mb-8 text-left bg-slate-50 dark:bg-slate-800/30 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                            <MetcCurriculum />
+                                        {/* Benefits Snippet (Replaces inline curriculum) */}
+                                        <div className="mb-8 text-left">
+                                            <MetcBenefits />
                                         </div>
 
-                                        {/* Actions */}
-                                        <div className="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start mt-auto">
-                                            {metcEvent.cta_link && (
-                                                <a
-                                                    href={metcEvent.cta_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-xl font-bold text-center shadow-lg shadow-blue-500/20 transition-all w-full md:w-auto"
-                                                >
-                                                    {metcEvent.cta_text || 'Daftar METC Sekarang'}
-                                                </a>
+                                        {/* Actions & Timer */}
+                                        <div className="flex flex-col items-center xl:items-start gap-8 mt-auto w-full">
+
+                                            {metcEvent.registration_deadline && (
+                                                <div className="w-full max-w-md mx-auto xl:mx-0 bg-slate-50 dark:bg-slate-800/30 p-2 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                                    <CountdownTimer deadline={metcEvent.registration_deadline} />
+                                                </div>
                                             )}
+
+                                            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center xl:justify-start">
+                                                {metcEvent.cta_link && (
+                                                    <a
+                                                        href={metcEvent.cta_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-xl font-bold text-center shadow-lg shadow-blue-500/20 transition-all flex-grow sm:flex-grow-0"
+                                                    >
+                                                        {metcEvent.cta_text || 'Daftar METC Sekarang'}
+                                                    </a>
+                                                )}
+                                                <button
+                                                    onClick={() => setShowMetcDetails(true)}
+                                                    className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 py-3 px-8 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex-grow sm:flex-grow-0"
+                                                >
+                                                    <BookOpen size={18} /> Lihat Kurikulum
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -712,6 +774,14 @@ const EventSection = () => {
                         onClose={() => setShowLearningPaths(false)}
                     >
                         <LearningPaths />
+                    </EventModal>
+                )}
+                {showMetcDetails && (
+                    <EventModal
+                        title="METC Curriculum"
+                        onClose={() => setShowMetcDetails(false)}
+                    >
+                        <MetcCurriculum />
                     </EventModal>
                 )}
             </AnimatePresence>
