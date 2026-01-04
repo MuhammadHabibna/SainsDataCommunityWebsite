@@ -28,6 +28,7 @@ import logo from './assets/logo.jpg';
 import { supabase } from './lib/supabaseClient';
 import EventSection from './components/EventSection';
 import StatsSection from './components/StatsSection';
+import HeroBackground from './components/HeroBackground';
 import CryptoJS from 'crypto-js';
 
 // --- CONFIGURATION & ASSETS ---
@@ -173,16 +174,7 @@ const Hero = () => {
     return (
         <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors py-32">
             {/* --- ABSTRACT BACKGROUND --- */}
-
-            {/* Grid Pattern */}
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808020_1px,transparent_1px),linear-gradient(to_bottom,#80808020_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
-
-            {/* Dynamic Mesh Gradients - SIMPLIFIED */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-[100px] opacity-55"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-500/10 dark:bg-blue-900/10 rounded-full blur-[100px] opacity-55"></div>
-            </div>
+            <HeroBackground />
 
             {/* --- CONTENT --- */}
             <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -709,6 +701,9 @@ const CertificateShowcase = () => {
                         <div className="absolute top-10 left-10 w-full h-full bg-slate-200 dark:bg-slate-800 rounded-2xl transform rotate-3"></div>
 
                         <motion.div
+                            initial={{ y: 0 }}
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                             whileHover={{ scale: 1.05, rotateY: 5 }}
                             className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 transition-transform duration-500"
                         >
@@ -745,6 +740,10 @@ const Benefits = () => {
                     {benefits.map((item, index) => (
                         <motion.div
                             key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1, duration: 0.5 }}
                             whileHover={{ y: -5 }}
                             className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-blue-100 dark:hover:border-blue-900 hover:shadow-xl transition-all duration-300 group"
                         >
