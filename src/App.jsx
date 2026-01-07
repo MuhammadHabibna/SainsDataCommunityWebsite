@@ -179,6 +179,29 @@ const Hero = () => {
             {/* --- CONTENT --- */}
             <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
 
+                {/* New Scholarship Shortcut */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="flex justify-center mb-6"
+                >
+                    <a
+                        href="#announcement"
+                        className="group relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-blue-200 dark:border-blue-900/50 rounded-full pl-2 pr-4 py-1.5 flex items-center gap-3 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 hover:scale-105 transition-all cursor-pointer"
+                    >
+                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-md">
+                            Baru
+                        </span>
+                        <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            Beasiswa Coding Camp 2026 <span className="hidden sm:inline text-slate-400 font-normal">by DBS Foundation</span>
+                        </span>
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                            Daftar Gratis <ChevronRight size={14} />
+                        </span>
+                    </a>
+                </motion.div>
+
                 {/* Floating Abstract Element */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

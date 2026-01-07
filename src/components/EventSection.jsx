@@ -544,7 +544,7 @@ const EventSection = () => {
                         <Calendar size={16} /> Agenda Terbaru
                     </div>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-slate-900 dark:text-white">
-                        Featured Programs
+                        Program Beasiswa Terbaru
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
                         Jangan lewatkan kesempatan untuk berkembang bersama SaDaCom. Ikuti program unggulan kami tahun ini.
