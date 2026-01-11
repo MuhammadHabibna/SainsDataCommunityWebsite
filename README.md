@@ -1,4 +1,4 @@
-# SaDaCom (Sains Data Community) Website
+# SaDaComm (Sains Data Community) Website
 
 Website landing page resmi untuk komunitas SaDaCom (Sains Data Community) yang didukung oleh Dicoding. Project ini dibangun menggunakan React modern dengan fokus pada performa, estetika (Light/Dark mode), dan interaktivitas.
 
